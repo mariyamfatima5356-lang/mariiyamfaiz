@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ur">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NekiTracker — Mariyam Faiz Barakatiah</title>
+<style>
+:root{
+  --bg1:#fff7fb;
+  --card:#ffffff;
+  --accent:#d6336c;
+  --muted:#a64a6f;
+  --glass:rgba(255,255,255,0.9);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:linear-gradient(180deg,var(--bg1),#fff);
+  display:flex;align-items:center;justify-content:center;
+  height:100vh;padding:18px;color:#3a2430;
+}
+.wrap{
+  width:100%;max-width:760px;background:var(--glass);border-radius:18px;
+  padding:18px;box-shadow:0 10px 40px rgba(60,20,40,0.08);
+}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+h1{font-size:22px;color:var(--accent);margin:0;}
+.lead{font-size:13px;color:var(--muted);}
+.meta .name{font-weight:700;color:var(--accent);}
+.meta .score{font-size:13px;color:#9a5b77;}
+.box{background:var(--card);border-radius:12px;padding:14px;}
+.qtitle{font-size:19px;color:var(--accent);font-weight:700;margin-bottom:10px;}
+.qhadees{font-size:13px;color:#8a4e6a;margin-top:8px;}
+.btn-row{display:flex;gap:10px;margin-top:12px;}
+.btn{flex:1;padding:12px;border-radius:10px;border:0;font-weight:800;font-size:15px;cursor:pointer;}
+.btn.yes{background:var(--accent);color:white;}
+.btn.no{background:white;border:1px solid rgba(214,102,150,0.3);color:var(--accent);}
+.small{font-size:12px;color:#a06b87;}
+footer{text-align:center;font-size:13px;color:#9d5b78;margin-top:14px;}
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;}
+.modal.open{display:flex;}
+.panel{background:white;border-radius:14px;padding:16px;box-shadow:0 30px 80px rgba(40,10,30,0.25);
+width:90%;max-width:400px;}
+.panel h3{margin-top:0;color:var(--accent);}
+.encourage{font-weight:700;font-size:18px;margin-bottom:6px;}
+#loginScreen{display:flex;flex-direction:column;align-items:center;gap:10px;}
+input{padding:10px;border:1px solid #f3cce1;border-radius:8px;width:80%;max-width:300px;text-align:center;}
+.chart-bar{background:#f9e0eb;border-radius:8px;height:10px;overflow:hidden;margin-top:6px;}
+.chart-fill{background:var(--accent);height:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>NekiTracker</h1>
+    <p class="lead">Aao pyario, nek bane Aur Fatimatuzzahra RaziAllahu anha ke Naqshe Qadam par chale🌸</p>
+  </div>
+  <div class="meta">
+    <div class="name" id="userName"></div>
+    <div class="score small">Score: <span id="score">0</span></div>
+  </div>
+</header>
+
+<main>
+  <div id="loginCard" class="box">
+    <div id="loginScreen">
+      <h3 style="color:var(--accent)">Shuru karne se pehle</h3>
+      <input type="text" id="nameInput" placeholder="Apna naam likhiye">
+      <input type="date" id="dateInput">
+      <button class="btn yes" onclick="startApp()">BismiAllah🌸</button>
+    </div>
+  </div>
+
+  <div id="mainCard" class="box" style="display:none;">
+    <div id="questionArea">
+      <div class="qtitle" id="qtext"></div>
+      <div class="qhadees small" id="qhadees"></div>
+      <div class="btn-row">
+        <button id="yesBtn" class="btn yes">Jii Haan</button>
+        <button id="noBtn" class="btn no">Jii Nahin</button>
+      </div>
+    </div>
+    <div id="doneArea" style="display:none;text-align:center;">
+      <h3 style="color:var(--accent)">MashaAllah 🌸</h3>
+      <p class="small">Aap ne tamam sawalat mukammal kar liye.</p>
+      <p style="font-weight:700;font-size:24px;color:var(--accent);margin:6px 0;">
+        Score <span id="finalScore">0</span>/100
+      </p>
+      <p id="resultMsg" style="color:#9a5b77;"></p>
+      <div class="chart">
+        <h4 style="color:var(--accent);font-size:14px;">Weekly Chart</h4>
+        <div id="chartList" style="font-size:12px;margin-top:4px;"></div>
+      </div>
+      <button id="resetBtn" class="btn no" style="margin-top:10px;">Reset</button>
+    </div>
+  </div>
+  <div class="small" style="margin-top:25px;">
+  </div>
+</main>
+<footer>Developed by Mariyam Faiz Barakatiah</footer>
+</div>
+
+<div class="modal" id="modal">
+  <div class="panel">
+    <div class="encourage" id="encourage"></div>
+    <p id="hadeesText"></p>
+    <div style="text-align:right;margin-top:10px;">
+      <button id="okBtn" class="btn yes" style="padding:8px 14px;font-size:14px;">SubhanAllah</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const questions=[
+  {q:"Kya Apne aaj Allah Azzawajal ke liye waqt nikale?",h:"Jo Allah ke liye waqt nikalta hai, Allah uske dil ko noor bakhsh deta hai.",good:"yes"},
+  {q:"Kya Apne aaj 100 bar Istighfar parhe?",h:"Jo bahut Istighfar karta hai uske har gum door kiye jaate hain. (Rasool Allah ﷺ)",good:"yes"},
+  {q:"Kya Apne kisi gair mard ki taraf nigah ki?",h:"Nigah neeche rakhna imaan ka hissa hai. (Rasool Allah ﷺ)",good:"No"},
+  {q:"Kya Apne gair mard se has has kar baat ki?",h:"Haya imaan ka Hissa hai. (Rasool Allah ﷺ)",good:"no"},
+  {q:"Kya Apne Aaj koi neki wala kam kiya?",h:"Neki jannat tak lejati hai. (Rasool Allah ﷺ)",good:"yes"},
+  {q:"Kya Apne aaj Qur'an ko samjha ya seekha?",h:"Jo Qur’an seekhta hai wo behtareen hai. (Rasool Allah ﷺ)",good:"yes"},
+  {q:"Kya Apne pardah kiya ya uski niyyat ki?",h:"Pardah karna Har Musalman Aurat par Farz hai.",good:"yes"},
+  {q:"Kya Apne Aaj walidain ko ulta jawab diya?",h:"Walidain se acha bartao karna behtareen neki hai.",good:"no"},
+  {q:"Kya Apne aaj kam az kam 313 bar durud parha?",h:"Jo mujh par durud bhejta hai Allah us par rehmat Nazil farmata hai. (ﷺ)",good:"yes"},
+  {q:"Kya Ap aaj jhoot, chugli ya hasad se bache?",h:"Sacha momin jhoot aur chugli se door rehta hai. (Rasool Allah ﷺ)",good:"yes"}
+];
+let idx=0,score=0,userName="",today="",weekData={};
+
+function startApp(){
+  const n=document.getElementById("nameInput").value.trim();
+  const d=document.getElementById("dateInput").value;
+  if(!n||!d){alert("Apna naam aur date likhiye 🌸");return;}
+  userName=n;today=d;
+  document.getElementById("userName").textContent=userName;
+  document.getElementById("loginCard").style.display="none";
+  document.getElementById("mainCard").style.display="block";
+  loadWeek();
+  showQ();
+}
+function loadWeek(){
+  const data=localStorage.getItem("neki_week");
+  weekData=data?JSON.parse(data):{};
+}
+function saveWeek(){
+  weekData[today]=score;
+  localStorage.setItem("neki_week",JSON.stringify(weekData));
+}
+function drawChart(){
+  const chart = document.getElementById("chartList");
+  chart.innerHTML = "";
+  
+  const days = Object.keys(weekData).sort();
+  days.forEach(d => {
+    const s = weekData[d];
+    chart.innerHTML += `
+      <div>${d} — ${s}/100
+        <div class='chart-bar'>
+          <div class='chart-fill' style='width:${s}%;'></div>
+        </div>
+      </div>`;
+  });
+}
+function showQ(){
+  if(idx>=questions.length){
+    document.getElementById("questionArea").style.display="none";
+    const done=document.getElementById("doneArea");
+    done.style.display="block";
+    document.getElementById("finalScore").innerText=score;
+    document.getElementById("resultMsg").innerText=
+      score===100?"Allah ke bohot nazdeek ho gaye aap 💖":"Apne aamal me behtari laayein 🤲";
+    saveWeek();drawChart();
+    return;
+  }
+  document.getElementById("qtext").textContent=`Question ${idx+1} of ${questions.length}: ${questions[idx].q}`;
+  document.getElementById("qhadees").textContent="";
+}
+function handle(ans){
+  const q=questions[idx];
+  const correct=(ans===q.good);
+  if(correct){score+=10;document.getElementById("encourage").textContent="MashaAllah 💖";}
+  else{document.getElementById("encourage").textContent="Astagfirullah 🤲";}
+  document.getElementById("hadeesText").textContent=q.h;
+  document.getElementById("modal").classList.add("open");
+  document.getElementById("score").textContent=score;
+}
+document.getElementById("yesBtn").onclick=()=>handle("yes");
+document.getElementById("noBtn").onclick=()=>handle("no");
+document.getElementById("okBtn").onclick=()=>{
+  document.getElementById("modal").classList.remove("open");
+  idx++;showQ();
+};
+document.getElementById("resetBtn").onclick=()=>location.reload();
+</script>
+</body>
+</html>
